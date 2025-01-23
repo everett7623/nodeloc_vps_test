@@ -2,9 +2,9 @@
 
 这是NodeLoc提供给各位用户的主机聚合测评脚本，可一键自动对主机进行Yabs、融合怪、IP质量、流媒体解锁，三网测速，回程路由等测评，测评结束后会生成一个txt文件，可在线自行复制内容 发到NodeLoc论坛。
 
-**版本：** 2024-09-08 v1.2.4
+**版本：** 2025-01-21 v1.2.7
 
-**Github地址：** https://github.com/everett7623/nodeloc_vps_test
+**Github地址：** https://github.com/nodeloc/nodeloc_vps_test
 
 **VPS 选购:** [NodeLoc VPS](https://www.nodeloc.com/vps)
 
@@ -13,13 +13,18 @@
 
 **支持CentOS/Debian/Ubuntu/Deepin**
 
-CentOS
 ```bash
-yum install wget&&wget -O Nlbench.sh https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
+curl -o Nlbench.sh https://raw.githubusercontent.com/nodeloc/nodeloc_vps_test/main/Nlbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
 ```
-Debian/Ubuntu/Deepin
+** 短链接
 ```bash
-wget -O Nlbench.sh https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
+curl -sSL abc.sd | bash
+```
+
+** 中国大陆 
+
+```bash
+curl -o Nlbench.sh https://ghfast.top/https://raw.githubusercontent.com/nodeloc/nodeloc_vps_test/main/Cnbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
 ```
 
 ### 效果图

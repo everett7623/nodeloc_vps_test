@@ -2,8 +2,8 @@
 
 # 定义版本
 CURRENT_VERSION="2025-01-21 v1.2.7" # 最新版本号
-SCRIPT_URL="https://raw.githubusercontent.com/nodeloc/nodeloc_vps_test/main/Nlbench.sh"
-VERSION_URL="https://raw.githubusercontent.com/nodeloc/nodeloc_vps_test/main/version.sh"
+SCRIPT_URL="https://ghfast.top/https://raw.githubusercontent.com/nodeloc/nodeloc_vps_test/main/Nlbench.sh"
+VERSION_URL="https://ghfast.top/https://raw.githubusercontent.com/nodeloc/nodeloc_vps_test/main/version.sh"
 CLOUD_SERVICE_BASE="https://bench.nodeloc.cc"
 
 # 定义颜色
@@ -224,7 +224,7 @@ install_dependencies() {
     
     case "${os_type,,}" in
         debian|ubuntu)
-            export DEBIAN_FRONTEND=noninteractive 
+            export DEBIAN_FRONTEND=noninteractive  # 禁用交互
             echo "iperf3 iperf3/autostart boolean false" | sudo debconf-set-selections
             install_cmd="apt-get install -yq"
             sudo apt-get update -yq
@@ -263,8 +263,6 @@ install_dependencies() {
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
 }
-
-
 
 # 获取IP地址和ISP信息
 ip_address_and_isp() {
@@ -385,10 +383,10 @@ run_script() {
             echo -e "运行${YELLOW}多线程测速...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
-            bash <(curl -sL https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "3" | tee "$temp_file"
+            bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "3" | tee "$temp_file"
             else
             echo "使用IPv4测试选项"
-            bash <(curl -sL https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "1" | tee "$temp_file"
+            bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "1" | tee "$temp_file"
             fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
@@ -402,10 +400,10 @@ run_script() {
             echo -e "运行${YELLOW}单线程测速...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
-            bash <(curl -sL https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "17" | tee "$temp_file"
+            bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "17" | tee "$temp_file"
             else
             echo "使用IPv4测试选项"
-            bash <(curl -sL https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "2" | tee "$temp_file"
+            bash <(curl -sL https://ghfast.top/https://raw.githubusercontent.com/i-abc/Speedtest/main/speedtest.sh) <<< "2" | tee "$temp_file"
             fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
@@ -419,10 +417,10 @@ run_script() {
             echo -e "运行${YELLOW}回程路由测试...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "4" | tee "$temp_file"
+            wget -N --no-check-certificate https://ghfast.top/https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "4" | tee "$temp_file"
             else
             echo "使用IPv4测试选项"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
+            wget -N --no-check-certificate https://ghfast.top/https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             fi
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/No:1\/9 Traceroute to/,$!d' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"

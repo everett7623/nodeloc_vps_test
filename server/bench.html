@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试结果页面</title>
+  </head>
+  <body>
+    <div class="loading">
+      正在加载文件
+    </div>
+    <div class="tabs"></div>
+    <button class="copy-btn" data-clipboard-target="#copy-target">
+      复制论坛代码/Copy BBCode
+    </button>
+    <textarea id="copy-target"></textarea>
+    <style>
+      html {
+        --body-bg: #fff;
+        --muted-color: #546e7a;
+        --border-radius: 5px;
+        --primary-color: #0d47a1;
+        --control-bg: #bbdefb;
+      }
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+      .copy-btn {
+        padding: 7px;
+        border-radius: var(--border-radius);
+        background: #0d47a1;
+        color: #fff;
+        vertical-align: bottom;
+        outline: 0;
+        border: unset;
+        box-shadow: 1px 1px 2px black;
+        cursor: pointer;
+        position: fixed;
+        left: 5px;
+        bottom: 5px;
+      }
+      .copy-btn:active {
+        box-shadow: 1px 1px 2px black inset;
+      }
+      #copy-target {
+        margin-top: 50px;
+        z-index: -1;
+        display: none;
+      }
+
+      .loading,
+      .error {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        text-align: center;
+        font-size: large;
+        z-index: 999;
+      }
+      .error {
+        background-color: #ffcdd2;
+      }
+      .loading {
+        background-color: #e3f2fd;
+      }
+    </style>
+    <style>
+      .tabs {
+        position: relative;
+        clear: both;
+        padding-top: 44px;
+        white-space: nowrap;
+        overflow: auto;
+        height: 28px;
+            max-width: 1000px;
+    margin: 0 auto;
+      }
+      .tabs .tab {
+        display: inline-block;
+      }
+      .tabs .tab:first-of-type label {
+        border-top-left-radius: var(--border-radius);
+      }
+      .tabs .tab:last-of-type label {
+        border-top-right-radius: var(--border-radius);
+      }
+      .tabs .tab label {
+        background: var(--body-bg);
+        padding: 10px 10px 7px;
+        border: 1px solid var(--muted-color);
+        margin-left: -1px;
+        position: relative;
+        left: 1px;
+      }
+      .tabs .tab [type="radio"] {
+        display: none;
+      }
+      .tabs .content-tab {
+        display: none;
+        position: fixed;
+        top: 72px;
+        left: 0;
+        background: var(--body-bg);
+        right: 0;
+        bottom: 100px;
+        padding: 10px 20px;
+        border: 1px solid var(--muted-color);
+        border-radius: 0 var(--border-radius) var(--border-radius)
+          var(--border-radius);
+        overflow-y: auto;
+            max-width: 1000px;
+    margin: 0 auto;
+      }
+      .tabs [type="radio"]:checked ~ label {
+        background: var(--control-bg);
+        border-bottom: 3px solid var(--primary-color);
+      }
+      .tabs [type="radio"]:checked ~ label ~ .content-tab {
+        display: block;
+      }
+    </style>
+    <script src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+    <script>
+      function getFilePath(fileName) {
+        // 从 URL 中提取路径部分
+        const urlSegments = location.pathname.split('/');
+        
+        // 动态获取年份和月份
+        const year = urlSegments[2]; // 第二部分为年份
+        const month = urlSegments[3]; // 第三部分为月份
+        
+        // 构造文件路径
+        return `/${year}/${month}/${fileName}`;
+      }
+
+        const fileNameMatch =
+          new URLSearchParams(window.location.search).get("filename") ||
+          location.pathname.split("/").pop();
+    
+        if (fileNameMatch) {
+          const fileName = decodeURIComponent(fileNameMatch);
+          const filePath = getFilePath(fileName);
+          console.log(filePath);
+    
+          $.ajax({
+            url: filePath,
+            success: render
+          });
+        }
+
+      function render(data) {
+        $("#copy-target").val(data);
+        $(".loading").remove();
+        $(".tabs").append(
+          $("<div>")
+            .addClass("tab")
+            .append(
+              $("<input>")
+                .attr("type", "radio")
+                .attr("id", `taball`)
+                .attr("name", "tabs")
+                .attr("checked", "checked")
+            )
+            .append($("<label>").attr("for", `taball`).text("全部/All"))
+            .append(
+              $("<div>")
+                .addClass("content-tab")
+                .append(
+                  $("<code>")
+                    .addClass("language-bbcode")
+                    .append($("<pre>").text(data))
+                )
+            )
+        );
+        const tags = Array.from(
+          data.matchAll(/\[TAB=([^\]]*)\]([^]*?)\[\/tab\]/gi)
+        );
+
+        tags.forEach((tagMatching, i) => {
+          if (tagMatching[1] && tagMatching[2]) {
+            const tab = $("<div>")
+              .addClass("tab")
+              .append(
+                $("<input>")
+                  .attr("type", "radio")
+                  .attr("id", `tab-${i}`)
+                  .attr("name", "tabs")
+              )
+              .append(
+                $("<label>").attr("for", `tab-${i}`).text(tagMatching[1])
+              );
+
+            const codeContentMatching = /```([^\s]*?)([^]*)```/.exec(
+              tagMatching[2]
+            );
+            const contentEl = $("<div>").addClass("content-tab");
+            if (codeContentMatching) {
+              const code = $("<code>").append(
+                $("<pre>").text(codeContentMatching[2])
+              );
+              if (codeContentMatching[1]) {
+                contentEl.addClass("language-" + codeContentMatching[1]);
+              }
+              contentEl.append(code);
+            } else {
+              contentEl.text(tagMatching[2]);
+            }
+
+            tab.append(contentEl);
+            $(".tabs").append(tab);
+          }
+        });
+        hljs.highlightAll();
+        new ClipboardJS(".copy-btn");
+      }
+
+      function fail() {
+        $(".loading").attr("class", "error").text("无法加载数据文件，请检查URL");
+      }
+    </script>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试结果页面</title>
+  </head>
+  <body>
+    <div class="loading">
+      正在加载文件
+    </div>
+    <div class="tabs"></div>
+    <div class="footer">
+        <button class="copy-btn" data-clipboard-target="#copy-target">
+          复制代码 / Copy
+        </button>
+        <button class="link-btn" id="visit-forum">
+          访问论坛 / Visit forum
+        </button>
+    </div>
+    <textarea id="copy-target"></textarea>
+    <style>
+      html {
+        --body-bg: #fff;
+        --muted-color: #546e7a;
+        --border-radius: 5px;
+        --primary-color: #0d47a1;
+        --control-bg: #bbdefb;
+      }
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: url('https://s.rmimg.com/2025/01/21/b5af503d48d3cacdddd5089dabe4a76c.jpg') no-repeat center center fixed;
+        background-size: cover;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+      }
+      .copy-btn {
+        padding: 7px;
+        border-radius: var(--border-radius);
+        background: #0d47a1;
+        color: #fff;
+        vertical-align: bottom;
+        outline: 0;
+        border: unset;
+        box-shadow: 1px 1px 2px black;
+        cursor: pointer;
+      }
+      .link-btn {
+        padding: 7px;
+        border-radius: var(--border-radius);
+        background: #0da148;
+        color: #fff;
+        vertical-align: bottom;
+        outline: 0;
+        border: unset;
+        box-shadow: 1px 1px 2px black;
+        cursor: pointer;
+      }
+      .copy-btn:active {
+        box-shadow: 1px 1px 2px black inset;
+      }
+      #copy-target {
+        margin-top: 50px;
+        z-index: -1;
+        width: 0px;
+        height: 0px;
+      }
+
+      .loading,
+      .error {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        text-align: center;
+        font-size: large;
+        z-index: 999;
+      }
+      .error {
+        background-color: #ffcdd2;
+      }
+      .loading {
+        background-color: #e3f2fd;
+      }
+    </style>
+    <style>
+    .footer{
+        position: fixed;
+        bottom: 50px;
+        width: 1000px;
+        max-width: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        clear: both;
+    }
+      .tabs {
+        position: relative;
+        clear: both;
+        padding-top: 44px;
+        white-space: nowrap;
+        height: 28px;
+            max-width: 1041px;
+    margin: 0 auto;
+      }
+      .tabs .tab {
+        display: inline-block;
+      }
+      .tabs .tab:first-of-type label {
+        border-top-left-radius: var(--border-radius);
+      }
+      .tabs .tab:last-of-type label {
+        border-top-right-radius: var(--border-radius);
+      }
+      .tabs .tab label {
+        background: var(--body-bg);
+        padding: 10px 10px 7px;
+        border: 1px solid var(--muted-color);
+        margin-left: -1px;
+        position: relative;
+        left: 1px;
+        opacity: 68%;
+      }
+      .tabs .tab [type="radio"] {
+        display: none;
+      }
+      .tabs .content-tab {
+        display: none;
+        position: fixed;
+        top: 72px;
+        left: 0;
+        background: #000;
+        right: 0;
+        color: #fff;
+        bottom: 100px;
+        padding: 10px 20px;
+        border: 1px solid var(--muted-color);
+        border-radius: 0 var(--border-radius) var(--border-radius)
+          var(--border-radius);
+        overflow-y: auto;
+            max-width: 1000px;
+    margin: 0 auto;
+        opacity: 0.68;
+
+      }
+      .tabs [type="radio"]:checked ~ label {
+        background: var(--control-bg);
+        border-bottom: 3px solid var(--primary-color);
+      }
+      .tabs [type="radio"]:checked ~ label ~ .content-tab {
+        display: block;
+      }
+    </style>
+    <script src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+    <script>
+      document.getElementById('visit-forum').addEventListener('click', function () {
+          window.location.href = "https://www.nodeloc.com";
+      });
+      function getFilePath(fileName) {
+        // 从 URL 中提取路径部分
+        const urlSegments = location.pathname.split('/');
+        
+        // 动态获取年份和月份
+        const year = urlSegments[2]; // 第二部分为年份
+        const month = urlSegments[3]; // 第三部分为月份
+        
+        // 构造文件路径
+        return `/${year}/${month}/${fileName}`;
+      }
+
+        const fileNameMatch =
+          new URLSearchParams(window.location.search).get("filename") ||
+          location.pathname.split("/").pop();
+    
+        if (fileNameMatch) {
+          const fileName = decodeURIComponent(fileNameMatch);
+          const filePath = getFilePath(fileName);
+          console.log(filePath);
+    
+          $.ajax({
+            url: filePath,
+            success: render
+          });
+        }
+
+      function render(data) {
+        $("#copy-target").val(data);
+        $(".loading").remove();
+        $(".tabs").append(
+          $("<div>")
+            .addClass("tab")
+            .append(
+              $("<input>")
+                .attr("type", "radio")
+                .attr("id", `taball`)
+                .attr("name", "tabs")
+                .attr("checked", "checked")
+            )
+            .append($("<label>").attr("for", `taball`).text("全部/All"))
+            .append(
+              $("<div>")
+                .addClass("content-tab")
+                .append(
+                  $("<code>")
+                    .addClass("language-bbcode")
+                    .append($("<pre>").text(data))
+                )
+            )
+        );
+        const tags = Array.from(
+          data.matchAll(/\[TAB=([^\]]*)\]([^]*?)\[\/tab\]/gi)
+        );
+
+        tags.forEach((tagMatching, i) => {
+          if (tagMatching[1] && tagMatching[2]) {
+            const tab = $("<div>")
+              .addClass("tab")
+              .append(
+                $("<input>")
+                  .attr("type", "radio")
+                  .attr("id", `tab-${i}`)
+                  .attr("name", "tabs")
+              )
+              .append(
+                  $("<label>").attr("for", `tab-${i}`).text(tagMatching[1].replace(/"/g, ""))
+                );
+
+            const codeContentMatching = /```([^\s]*?)([^]*)```/.exec(
+              tagMatching[2]
+            );
+            const contentEl = $("<div>").addClass("content-tab");
+            if (codeContentMatching) {
+              const code = $("<code>").append(
+                $("<pre>").text(codeContentMatching[2])
+              );
+              if (codeContentMatching[1]) {
+                contentEl.addClass("language-" + codeContentMatching[1]);
+              }
+              contentEl.append(code);
+            } else {
+              contentEl.text(tagMatching[2]);
+            }
+
+            tab.append(contentEl);
+            $(".tabs").append(tab);
+          }
+        });
+        hljs.highlightAll();
+        new ClipboardJS(".copy-btn");
+      }
+
+      function fail() {
+        $(".loading").attr("class", "error").text("无法加载数据文件，请检查URL");
+      }
+    </script>
+  </body>
+</html>
